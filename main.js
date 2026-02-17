@@ -143,7 +143,18 @@ function createGround() {
   );
 
   const loader = new THREE.TextureLoader();
-  // GitHub Pages 호환: 여러 경로 순차 시도
+  // GitHub Pages 호환: 리포지토리 경로 포함
+  const getBasePath = () => {
+    // 현재 URL에서 리포지토리 경로 추출
+    const pathname = window.location.pathname;
+    // 예: /three.js-playground/ 또는 /three.js-playground/index.html
+    const match = pathname.match(/^\/([^\/]+)/);
+    if (match && match[1] !== '') {
+      return '/' + match[1] + '/';
+    }
+    return './'; // 로컬 개발 환경
+  };
+  
   const tryLoadImage = (paths, index = 0) => {
     if (index >= paths.length) {
       // 모든 경로 실패 시 대체 heightmap 사용
@@ -168,11 +179,12 @@ function createGround() {
     );
   };
   
+  const basePath = getBasePath();
   // 여러 경로 시도 (GitHub Pages 호환)
   const imagePaths = [
-    'h2.png',           // 루트 기준
-    './h2.png',         // 상대 경로
-    '/h2.png',          // 절대 경로
+    basePath + 'h2.png',    // 리포지토리 경로 기준
+    './h2.png',             // 상대 경로
+    'h2.png',               // 루트 기준
   ];
   
   tryLoadImage(imagePaths);
