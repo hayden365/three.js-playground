@@ -143,8 +143,10 @@ function createGround() {
   );
 
   const loader = new THREE.TextureLoader();
+  // GitHub Pages 호환: 현재 페이지 기준 상대 경로
+  const imagePath = new URL('./h2.png', window.location.href).href;
   loader.load(
-    './h2.png',
+    imagePath,
     (disMap) => {
       disMap.wrapS = disMap.wrapT = THREE.ClampToEdgeWrapping;
       disMap.repeat.set(1, 1);
