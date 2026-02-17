@@ -143,22 +143,39 @@ function createGround() {
   );
 
   const loader = new THREE.TextureLoader();
-  // GitHub Pages 호환: 현재 페이지 기준 상대 경로
-  const imagePath = new URL('./h2.png', window.location.href).href;
-  loader.load(
-    imagePath,
-    (disMap) => {
-      disMap.wrapS = disMap.wrapT = THREE.ClampToEdgeWrapping;
-      disMap.repeat.set(1, 1);
-      addGroundMesh(groundGeo, disMap);
-    },
-    undefined,
-    (error) => {
-      console.warn('h2.png 로드 실패, 대체 heightmap 사용:', error);
+  // GitHub Pages 호환: 여러 경로 순차 시도
+  const tryLoadImage = (paths, index = 0) => {
+    if (index >= paths.length) {
+      // 모든 경로 실패 시 대체 heightmap 사용
+      console.warn('h2.png를 모든 경로에서 찾을 수 없음, 대체 heightmap 사용');
       const disMap = createFallbackHeightmap();
       addGroundMesh(groundGeo, disMap);
-    },
-  );
+      return;
+    }
+    
+    loader.load(
+      paths[index],
+      (disMap) => {
+        disMap.wrapS = disMap.wrapT = THREE.ClampToEdgeWrapping;
+        disMap.repeat.set(1, 1);
+        addGroundMesh(groundGeo, disMap);
+      },
+      undefined,
+      () => {
+        // 현재 경로 실패, 다음 경로 시도
+        tryLoadImage(paths, index + 1);
+      }
+    );
+  };
+  
+  // 여러 경로 시도 (GitHub Pages 호환)
+  const imagePaths = [
+    'h2.png',           // 루트 기준
+    './h2.png',         // 상대 경로
+    '/h2.png',          // 절대 경로
+  ];
+  
+  tryLoadImage(imagePaths);
 }
 
 function addGroundMesh(groundGeo, displacementMap) {
